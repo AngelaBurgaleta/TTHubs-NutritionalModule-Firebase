@@ -1,0 +1,38 @@
+[
+    {
+      "id": 1,
+      "Name": "Banana",
+      "FoodGroup": "Fruits",
+      "FoodSubgroup": "Fruits",
+      "Country": "Spain",
+      "Energy": "80/320",
+      "TotalProteins": "0",
+      "TotalCarbos": "20",
+      "TotalSugars": "18",
+      "TotalLipids": "0"
+    },
+    {
+      "id": 2,
+      "Name": "Veal meat",
+      "FoodGroup": "Meat",
+      "FoodSubgroup": "Meats",
+      "Country": "Spain",
+      "Energy": "230/860",
+      "TotalProteins": "18",
+      "TotalCarbos": "0",
+      "TotalSugars": "0",
+      "TotalLipids": "16"
+    },
+    {
+      "id": 3,
+      "Name": "Panga",
+      "FoodGroup": "Pescado",
+      "FoodSubgroup": "Pescado blanco",
+      "Country": "Spain",
+      "Energy": "67/279",
+      "TotalProteins": "16",
+      "TotalCarbos": "0",
+      "TotalSugars": "0",
+      "TotalLipids": "1"
+    }
+  ]
