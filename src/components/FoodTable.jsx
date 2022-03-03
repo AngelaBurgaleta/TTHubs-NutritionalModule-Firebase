@@ -139,18 +139,33 @@ const cargarDocumentos = () => {
   const [newName, setNewName] = useState("");
   const [newFoodGroup, setNewFoodGroup] = useState("");
   const [newEnergy, setNewEnergy] = useState(0);
+  const [newFoodSubgroup, setNewFoodSubgroup] = useState("");
+  const [newCountry, setNewCountry] = useState("");
+  const [newTotalCarbos, setNewTotalCarbos] = useState(0);
+  const [newTotalProteins, setNewTotalProteins] = useState(0);
+  const [newTotalLipids, setNewTotalLipids] = useState(0);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     await addDoc(foodsCollectionRefs, {
       Name: newName,
       FoodGroup: newFoodGroup,
+      FoodSubgroup: newFoodSubgroup,
+      Country: newCountry,
       Energy: Number(newEnergy),
+      TotalCarbos: Number(newTotalCarbos),
+      TotalProteins: Number(newTotalProteins),
+      TotalLipids: Number(newTotalLipids),
     });
 
     setNewName("");
     setNewFoodGroup("");
+    setNewFoodSubgroup("");
+    setNewCountry("");
     setNewEnergy(0);
+    setNewTotalCarbos(0);
+    setNewTotalProteins(0);
+    setNewTotalLipids(0);
   };
 
   //creación del nuevo nombre cuando le damos al botón
@@ -168,14 +183,52 @@ const cargarDocumentos = () => {
     setNewEnergy(event.target.value);
   };
 
+  const handleChangeCountry = (event) => {
+    setNewCountry(event.target.value);
+  };
+
+  const handleChangeTotalCarbos = (event) => {
+    setNewTotalCarbos(event.target.value);
+  };
+
+  const handleChangeTotalLipids = (event) => {
+    setNewTotalLipids(event.target.value);
+  };
+
+  const handleChangeTotalProteins = (event) => {
+    setNewTotalProteins(event.target.value);
+  };
+
+  const handleChangeFoodSubgroup = (event) => {
+    setNewFoodSubgroup(event.target.value);
+  };
+
   //---------------------------------------
 
   //ELIMINAR---------------------------
-  const deleteFood = async (id) => {
-    const FoodDoc = await getDocs(db, "data", id);
+  
 
-    await deleteDoc(FoodDoc);
-  };
+
+    const deleteFood = async (food) => {
+    //const FoodDoc = await getDocs(db, "data", id);
+
+    //await deleteDoc(FoodDoc);
+    await deleteDoc(doc(db, "data", food.id));
+  }; 
+ 
+   
+/* 
+
+  const deleteFood = async (food) => {
+    console.log(food.id)
+    if(window.confirm("estas seguro de eliminar")){
+      await db.firestore().collection('data').doc(food.id).delete();
+      this.getFoods()
+    }}
+  const deleteFood_oldd = document.querySelector('.delete')
+  deleteFood.addEventListener('submit', (e) => {
+    e.preventDefault()
+  })*/
 
   //---------------------------------------
 
@@ -275,8 +328,8 @@ const cargarDocumentos = () => {
                                 return val;
                               }
                             })
-                            .map((food, index) => (
-                              <tr key={index}>
+                            .map((food) => (
+                              <tr key={food.id}>
                                 <th>{food.Name}</th>
 
                                 <th>{food.FoodGroup}</th>
@@ -286,7 +339,8 @@ const cargarDocumentos = () => {
                                 <div class="card-body">
                                   <Button
                                     className="btn-icon btn-link edit btn btn-danger btn-sm"
-                                    onClick={() => deleteFood(food.index)}
+                                    onClick={() => deleteFood(food)}
+                                    
                                   >
                                     <i class="fa fa-times"></i>
                                   </Button>
@@ -327,7 +381,7 @@ const cargarDocumentos = () => {
                                   2
                                 </a>
                               </li>
-                              <li class="page-item">
+                              <li class="page-item" color="success">
                                 <a href="#pablo" class="page-link">
                                   3
                                 </a>
@@ -361,7 +415,7 @@ const cargarDocumentos = () => {
                               <label>Food Name</label>
                               <div class="form-group">
                                 <Input
-                                  placeholder="Name..."
+                                required
                                   type="text"
                                   value={newName}
                                   onChange={handleChangeName}
@@ -370,10 +424,25 @@ const cargarDocumentos = () => {
                               <label>Food Group</label>
                               <div class="form-group">
                                 <Input
-                                  placeholder="Food group..."
                                   type="text"
                                   value={newFoodGroup}
                                   onChange={handleChangeFoodGroup}
+                                />
+                              </div>
+                              <label>Food Subgroup</label>
+                              <div class="form-group">
+                                <Input
+                                  type="text"
+                                  value={newFoodSubgroup}
+                                  onChange={handleChangeFoodSubgroup}
+                                />
+                              </div>
+                              <label>Country</label>
+                              <div class="form-group">
+                                <Input
+                                  type="text"
+                                  value={newCountry}
+                                  onChange={handleChangeCountry}
                                 />
                               </div>
                             </div>
@@ -383,9 +452,35 @@ const cargarDocumentos = () => {
                                 <Input
                                   type="number"
                                   min="0"
-                                  placeholder="Energy"
                                   value={newEnergy}
                                   onChange={handleChangeEnergy}
+                                />
+                              </div>
+                              <label>Total Carbos</label>
+                              <div class="form-group">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={newTotalCarbos}
+                                  onChange={handleChangeTotalCarbos}
+                                />
+                              </div>
+                              <label>Total Proteins</label>
+                              <div class="form-group">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={newTotalProteins}
+                                  onChange={handleChangeTotalProteins}
+                                />
+                              </div>
+                              <label>Total Lipids</label>
+                              <div class="form-group">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={newTotalLipids}
+                                  onChange={handleChangeTotalLipids}
                                 />
                               </div>
                             </div>
@@ -393,16 +488,16 @@ const cargarDocumentos = () => {
                         </CardBody>
                         <CardFooter>
                           <div class="row">
-                            <div class = 'col-md-3'>
-                            <div class="form group">
-                              <Button
-                                type="submit"
-                                color="info"
-                                class="btn-round btn btn-info"
-                              >
-                                Add
-                              </Button>
-                            </div>
+                            <div class="col-md-3">
+                              <div class="form group">
+                                <Button
+                                  type="submit"
+                                  color="info"
+                                  class="btn-round btn btn-info"
+                                >
+                                  Add
+                                </Button>
+                              </div>
                             </div>
                             <div class="form group">
                               <Button
