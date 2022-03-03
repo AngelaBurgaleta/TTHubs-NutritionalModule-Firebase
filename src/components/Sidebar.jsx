@@ -44,11 +44,10 @@ export function Sidebar(props) {
       data-active-color={props.activeColor}
     >
       <div className="logo">
-        
         <div className="simple-text logo-normal">
-          <img src={logoTT} alt="react-logo" />
+          TTHubs
+          {/*<img src={logoTT} alt="react-logo" />*/}
         </div>
-        
       </div>
       <div className="sidebar-wrapper" ref={sidebar}>
         <Nav>

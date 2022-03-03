@@ -1,11 +1,20 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, Fragment, useEffect } from "react";
 import { nanoid } from "nanoid";
 import data from "./mock-data.json";
-
+import {
+  doc,
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 import {
   Card,
   CardHeader,
   CardBody,
+  CardFooter,
   CardTitle,
   Table,
   Row,
@@ -23,17 +32,164 @@ import {
   ModalHeader,
   Navbar,
 } from "reactstrap";
+import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 
-export function FoodTable(props) {
-  //manejador para filtrar por nombre del alimento
+export function FoodTable() {
+  //Declarar e inicializar lista de foods
+  const [foods, setFoods] = useState([]);
 
+  //Referencia a la db
+  const foodsCollectionRefs = collection(db, "data");
+
+  //PAGINACION
+  /*
+  const btnNext = document.createElement('button');
+  btn.innerText = 'Next Page';
+  document.body.append(btn)
+
+  let lastDocument: any = null;
+  btnNext.addEventListener('click', () => {
+    const query = foodsCollectionRefs
+    .orderBy('Nombre')
+    .startAfter(lastDocument)
+
+    query.limit(2).get().then( snap => {
+      lastDocument = snap.docs[snap.docs.length -1] ||
+
+      retornaDocumentos(snap)
+    })
+  })
+
+
+  btn.addEventListener('click', () => {
+    console.log('click')
+  })
+  ------------------------------
+
+  
+  const botonSiguiente = document.getElementById('botonSiguiente')
+  const botonAnterior = document.getElementById('botonAnterior')
+  const contenedorCards = document.getElementById('cards')
+
+  //Evento cada vez que cambia un valor de la bbdd
+  //snapshot es comom la captura
+  db.collection('data').onSnapshot((snapshot) =>
+  //console.log(snapshot.docs[0].data())
+  cargarDocumentos(snapshot.docs)
+
+})
+
+
+//por cada usuario queremos agregar una card (?)
+const cargarDocumentos = () => {
+  if(cargarDocumentos.length > 0) {
+    cargarDocumentos.forEach(documento => {
+      contenedorCards.innerHTML += `
+      
+      `;
+
+    })
+  }
+
+}
+*/
+
+  //ORDENAR ALFABÉTICAMENTE
+  const [order, setOrder] = useState("ASC");
+
+  const sorting = (col) => {
+    if (order === "ASC") {
+      const sorted = [...foods].sort((a, b) =>
+        a[col]?.toLowerCase() > b[col]?.toLowerCase() ? 1 : -1
+      );
+      setFoods(sorted);
+      setOrder("DSC");
+    }
+    if (order === "DSC") {
+      const sorted = [...foods].sort((a, b) =>
+        a[col]?.toLowerCase() < b[col]?.toLowerCase() ? 1 : -1
+      );
+      setFoods(sorted);
+      setOrder("ASC");
+    }
+  };
+
+  //FILTRAR POR NOMBRE
   const [search, setSearch] = useState("");
 
   const handleSearch = (event) => {
     setSearch(event.target.value);
   };
 
- 
+  //Para que la vista se renderice a la tabla de foods
+  useEffect(() => {
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefs);
+
+      console.log(data);
+      setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+
+    getFoods();
+  }, []);
+
+  //-------------------------------------------------
+
+  //AÑADIR campos para el formulario
+  const [newName, setNewName] = useState("");
+  const [newFoodGroup, setNewFoodGroup] = useState("");
+  const [newEnergy, setNewEnergy] = useState(0);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await addDoc(foodsCollectionRefs, {
+      Name: newName,
+      FoodGroup: newFoodGroup,
+      Energy: Number(newEnergy),
+    });
+
+    setNewName("");
+    setNewFoodGroup("");
+    setNewEnergy(0);
+  };
+
+  //creación del nuevo nombre cuando le damos al botón
+  const handleChangeName = (event) => {
+    setNewName(event.target.value);
+  };
+
+  //creación del nuevo food group
+  const handleChangeFoodGroup = (event) => {
+    setNewFoodGroup(event.target.value);
+  };
+
+  //creación de la nueva energy
+  const handleChangeEnergy = (event) => {
+    setNewEnergy(event.target.value);
+  };
+
+  //---------------------------------------
+
+  //ELIMINAR---------------------------
+  const deleteFood = async (id) => {
+    const FoodDoc = await getDocs(db, "data", id);
+
+    await deleteDoc(FoodDoc);
+  };
+
+  //---------------------------------------
+
+  //MODAL
+  //Abrir y cerrar el modal de añadir alimento
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = (event) => {
+    event.preventDefault();
+    setShow(true);
+  };
+
   return (
     <>
       <html class="nav-open">
@@ -42,7 +198,7 @@ export function FoodTable(props) {
             <Navbar expand="lg" className="navbar-absolute fixed-top">
               <div class="container-fluid">
                 <div class="navbar-wrapper">
-                  <div class="navbar-brand">Nutritional Profile Module</div>
+                  <div class="navbar-brand">Food Table</div>
                 </div>
               </div>
 
@@ -60,17 +216,16 @@ export function FoodTable(props) {
                     </InputGroupAddon>
                   </InputGroup>
                 </form>
+
                 <ul class="navbar-nav">
                   <li class="nav-item">
                     <Button
                       className="btn-round btn-icon btn"
-                      //className="nc-icon nc-simple-add"
                       color="success"
-                      onClick={props.handleShow}
-                    ><i
-                      className="nc-icon nc-simple-add">
-                      </i>
-                      </Button>
+                      onClick={handleShow}
+                    >
+                      <i className="nc-icon nc-simple-add"></i>
+                    </Button>
                   </li>
                 </ul>
               </div>
@@ -94,12 +249,13 @@ export function FoodTable(props) {
                       </InputGroupAddon>
                     </InputGroup>
                   </form>
-                  <Card>
+                  <Card id="cards">
                     <CardBody>
                       <Table striped>
                         <thead className="text-success">
                           <tr>
-                            <th>Name</th>
+                            <th onClick={() => sorting("Name")}>Name</th>
+                            {/*<Button onClick={() => sorting("Name")}>Ordenar</Button>*/}
                             <th>Food Group</th>
                             <th>Food Subgroup</th>
                             <th>Country</th>
@@ -107,12 +263,12 @@ export function FoodTable(props) {
                           </tr>
                         </thead>
                         <tbody>
-                          {props.foods
+                          {foods
                             .filter((val) => {
-                              if (props.search === "") {
+                              if (search === "") {
                                 return val;
                               } else if (
-                                val.Name.toLowerCase().includes(
+                                val.Name?.toLowerCase().includes(
                                   search.toLowerCase()
                                 )
                               ) {
@@ -121,100 +277,146 @@ export function FoodTable(props) {
                             })
                             .map((food, index) => (
                               <tr key={index}>
-                                <td>{food.Name}</td>
-                                <td>{food.FoodGroup}</td>
-                                <td>{food.FoodSubgroup}</td>
-                                <td>{food.Country}</td>
-                                <td>{food.Energy}</td>
+                                <th>{food.Name}</th>
+
+                                <th>{food.FoodGroup}</th>
+                                <th>{food.FoodSubgroup}</th>
+                                <th>{food.Country}</th>
+                                <th>{food.Energy}</th>
+                                <div class="card-body">
+                                  <Button
+                                    className="btn-icon btn-link edit btn btn-danger btn-sm"
+                                    onClick={() => deleteFood(food.index)}
+                                  >
+                                    <i class="fa fa-times"></i>
+                                  </Button>
+                                  <em> </em>
+                                  <Button className="btn-icon btn-link edit btn btn-info btn-sm">
+                                    <i className="fa fa-edit"></i>
+                                  </Button>
+                                </div>
                               </tr>
                             ))}
                         </tbody>
                       </Table>
                     </CardBody>
+
+                    <CardFooter>
+                      <nav class aral-label="pagination">
+                        <div class="row">
+                          <div class="col-sm-5"></div>
+                          <div class="col-sm-4">
+                            <ul class="pagination text-center">
+                              <li class="page-item">
+                                <a arial-label="Previous" class="page-link">
+                                  <span aria-hidden="true" color="success">
+                                    <i
+                                      aria-hidden="true"
+                                      class="fa fa-angle-double-left"
+                                    ></i>
+                                  </span>
+                                </a>
+                              </li>
+                              <li class="page-item">
+                                <a href="#pablo" class="page-link">
+                                  1
+                                </a>
+                              </li>
+                              <li class="page-item">
+                                <a href="#pablo" class="page-link">
+                                  2
+                                </a>
+                              </li>
+                              <li class="page-item">
+                                <a href="#pablo" class="page-link">
+                                  3
+                                </a>
+                              </li>
+
+                              <li class="page-item">
+                                <a arial-label="Next" class="page-link">
+                                  <span aria-hidden="true">
+                                    <i
+                                      aria-hidden="true"
+                                      class="fa fa-angle-double-right"
+                                    ></i>
+                                  </span>
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </nav>
+                    </CardFooter>
                   </Card>
 
-                  <Modal isOpen={props.show}>
+                  <Modal isOpen={show}>
                     <ModalHeader>Añadir Alimento</ModalHeader>
-                    <ModalBody>
-                      <Form onSubmit={props.handleAddFormSubmit}>
-                        <input
-                          type="text"
-                          name="Name"
-                          required="Required"
-                          placeholder="Enter a name"
-                          onChange={props.handleAddFormChange}
-                        />
 
-                        <input
-                          type="text"
-                          name="FoodGroup"
-                          required="Required"
-                          placeholder="Enter the food group"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="FoodSubgroup"
-                          required="Required"
-                          placeholder="Enter the food subgroup"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="Country"
-                          required="Required"
-                          placeholder="Enter the Country"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="Energy"
-                          required="Required"
-                          placeholder="Enter energy (Kcal)"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="TotalProteins"
-                          required="Required"
-                          placeholder="Enter total proteins"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="TotalCarbos"
-                          required="Required"
-                          placeholder="Enter total carbohydrates"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="TotalSugars"
-                          required="Required"
-                          placeholder="Enter total sugars"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <input
-                          type="text"
-                          name="TotalLipids"
-                          required="Required"
-                          placeholder="Enter total lipds"
-                          onChange={props.handleAddFormChange}
-                        />
-                        <Button
-                          color="success"
-                          className="nc-icon nc-simple-add"
-                          type="submit"
-                        >
-                          <em></em>
-                        </Button>
+                    <ModalBody>
+                      <Form onSubmit={handleSubmit}>
+                        <CardBody>
+                          <div class="row">
+                            <div class="col-md-6">
+                              <label>Food Name</label>
+                              <div class="form-group">
+                                <Input
+                                  placeholder="Name..."
+                                  type="text"
+                                  value={newName}
+                                  onChange={handleChangeName}
+                                />
+                              </div>
+                              <label>Food Group</label>
+                              <div class="form-group">
+                                <Input
+                                  placeholder="Food group..."
+                                  type="text"
+                                  value={newFoodGroup}
+                                  onChange={handleChangeFoodGroup}
+                                />
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <label>Energy</label>
+                              <div class="form-group">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Energy"
+                                  value={newEnergy}
+                                  onChange={handleChangeEnergy}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </CardBody>
+                        <CardFooter>
+                          <div class="row">
+                            <div class = 'col-md-3'>
+                            <div class="form group">
+                              <Button
+                                type="submit"
+                                color="info"
+                                class="btn-round btn btn-info"
+                              >
+                                Add
+                              </Button>
+                            </div>
+                            </div>
+                            <div class="form group">
+                              <Button
+                                color="danger"
+                                class="btn-round btn btn-info"
+                                onClick={handleClose}
+                              >
+                                Close
+                              </Button>
+                            </div>
+                          </div>
+                        </CardFooter>
                       </Form>
                     </ModalBody>
-                    <ModalFooter>
-                      <Button onClick={props.handleClose} color="success">
-                        Cerrar
-                      </Button>
-                    </ModalFooter>
                   </Modal>
                 </Col>
               </Row>
