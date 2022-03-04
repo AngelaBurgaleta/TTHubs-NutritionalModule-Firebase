@@ -166,6 +166,15 @@ const cargarDocumentos = () => {
     setNewTotalCarbos(0);
     setNewTotalProteins(0);
     setNewTotalLipids(0);
+
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefs);
+
+      console.log(data);
+      setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+
+    getFoods();
   };
 
   //creación del nuevo nombre cuando le damos al botón
@@ -214,6 +223,14 @@ const cargarDocumentos = () => {
 
     //await deleteDoc(FoodDoc);
     await deleteDoc(doc(db, "data", food.id));
+    const getFoods = async () => {
+      const data = await getDocs(foodsCollectionRefs);
+
+      console.log(data);
+      setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+
+    getFoods();
   }; 
  
    
@@ -251,24 +268,18 @@ const cargarDocumentos = () => {
             <Navbar expand="lg" className="navbar-absolute fixed-top">
               <div class="container-fluid">
                 <div class="navbar-wrapper">
+                  <div class='row'>
                   <div class="navbar-brand">Food Table</div>
                 </div>
               </div>
 
               <div class="justify-content-end collapse navbar-collapse">
-                <form>
-                  <InputGroup className="no-border">
-                    <Input
-                      id="search"
-                      type="text"
-                      placeholder="filtros aqui"
-                      onChange={handleSearch}
-                    />
-                    <InputGroupAddon addonType="append">
-                      <InputGroupText></InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
-                </form>
+                
+                  <button class='btn-round btn btn-warning btn-sm'>
+                    Light</button>
+                    <button class='btn-round btn btn-warning btn-sm'>
+                    Gluten free</button>
+              </div>
 
                 <ul class="navbar-nav">
                   <li class="nav-item">
@@ -412,7 +423,7 @@ const cargarDocumentos = () => {
                         <CardBody>
                           <div class="row">
                             <div class="col-md-6">
-                              <label>Food Name</label>
+                              <label>Food Name *</label>
                               <div class="form-group">
                                 <Input
                                 required
