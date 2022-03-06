@@ -1,18 +1,14 @@
+//https://www.youtube.com/watch?v=xu-gf2kFxao 8.36
 import React, { useState, Fragment, useEffect } from "react";
 import { nanoid } from "nanoid";
 import data from "./mock-data.json";
-//https://bluuweb.github.io/react-udemy/07-crud-firestore/#agregar-documentos
 import {
   doc,
   collection,
   getDocs,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
-  orderBy,
-  onSnapshot,
-  query,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import {
@@ -51,30 +47,40 @@ export function FoodTable() {
   const btnNext = document.createElement('button');
   btn.innerText = 'Next Page';
   document.body.append(btn)
+
   let lastDocument: any = null;
   btnNext.addEventListener('click', () => {
     const query = foodsCollectionRefs
     .orderBy('Nombre')
     .startAfter(lastDocument)
+
     query.limit(2).get().then( snap => {
       lastDocument = snap.docs[snap.docs.length -1] ||
+
       retornaDocumentos(snap)
     })
   })
+
+
   btn.addEventListener('click', () => {
     console.log('click')
   })
   ------------------------------
+
   
   const botonSiguiente = document.getElementById('botonSiguiente')
   const botonAnterior = document.getElementById('botonAnterior')
   const contenedorCards = document.getElementById('cards')
+
   //Evento cada vez que cambia un valor de la bbdd
   //snapshot es comom la captura
   db.collection('data').onSnapshot((snapshot) =>
   //console.log(snapshot.docs[0].data())
   cargarDocumentos(snapshot.docs)
+
 })
+
+
 //por cada usuario queremos agregar una card (?)
 const cargarDocumentos = () => {
   if(cargarDocumentos.length > 0) {
@@ -82,8 +88,10 @@ const cargarDocumentos = () => {
       contenedorCards.innerHTML += `
       
       `;
+
     })
   }
+
 }
 */
 
@@ -115,7 +123,6 @@ const cargarDocumentos = () => {
   };
 
   //Para que la vista se renderice a la tabla de foods
-
   useEffect(() => {
     const getFoods = async () => {
       const data = await getDocs(foodsCollectionRefs);
@@ -127,20 +134,6 @@ const cargarDocumentos = () => {
     getFoods();
   }, []);
 
-  //obtener foods in real Time
-  /* function to get all tasks from firestore in realtime 
-  useEffect(() => {
-    const q = query(collection(db, "data"), orderBy("created", "desc"));
-    onSnapshot(q, (querySnapshot) => {
-      setFoods(
-        querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          data: doc.data(),
-        }))
-      );
-    });
-  }, []);
-*/
   //-------------------------------------------------
 
   //AÑADIR campos para el formulario
@@ -178,7 +171,7 @@ const cargarDocumentos = () => {
     const getFoods = async () => {
       const data = await getDocs(foodsCollectionRefs);
 
-      console.log(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      console.log(data);
       setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
 
@@ -239,72 +232,79 @@ const cargarDocumentos = () => {
     getFoods();
   };
 
-  //---------------------------------------
+  //-----------------------------------------
 
-  //UPDATE----------------------
-  const [showUpdate, setShowUpdate] = useState(false);
-  const handleCloseUpdate = () => setShowUpdate(false);
+  //ACTUALIZAR--------------------------- YOUTUBE
 
-  const openUpdateModal = async (food) => {
-    console.log(food.id);
+  const [modalShow, setModalShow] = useState(false)
+  const {Name, FoodSubgroup} = value;
+  const[update,setUpdata] = useState({})
+  const [allDocs, setAllDocs] = useState([])
+  const [singleDoc, setSingleDoc] = useState({});
+  const {daata} 
 
-    setShowUpdate(true);
+  function fetchAll(e) {
 
-    setOpenFood(food);
+  }
+
+  function fetchSingle(e){
+
+  }
+
+  useEffect(() => {
+    fetchAll()
+
+  }, [])
+
+  const handleChange = (name) => (e) => {
+    e.preventDefault();
+    setValue({ ...value, [name]: e.target.value });
   };
 
-  const [openFood, setOpenFood] = useState({});
-
-  const handleSubmitUpdate = async (food) => {
-    console.log(food.id);
-    const foodDocRef = doc(db, "data", food.id)
-    
-      await updateDoc(foodDocRef, {
-        Name: newName || food.newName,
-        FoodGroup: 'prue',
-        //FoodSubgroup: newFoodSubgroup || food.newFoodSubgroup,
-        //Country: newCountry || food.newCountry,
-        //Energy: Number(newEnergy) || food.newEnergy,
-        //TotalCarbos: Number(newTotalCarbos) || food.newTotalCarbos,
-        //TotalProteins: Number(newTotalProteins) || food.newTotalProteins,
-        //TotalLipids: Number(newTotalLipids) || food.newTotalLipids,
-      });
-  
-    updateDoc(foodDocRef, openFood); //??
-    console.log("buenas tardes");
-
-    
-    setNewName("");
-    setNewFoodGroup("");
-    setNewFoodSubgroup("");
-    setNewCountry("");
-    setNewEnergy(0);
-    setNewTotalCarbos(0);
-    setNewTotalProteins(0);
-    setNewTotalLipids(0);
  
 
+  const updateDocFood = () => {
+    FoodName: "",
+    FoodGroup: "",
+    FoodSubgroup: "",
+    Country: "",
+    Energy: 0,
+    TotalCarbos:0, 
+    TotalProteins:0, 
+    TotalLipids: 0,
+
+  }
+
+  const [value, setValue] = useState({
+    name: daata.name,
     
 
-    const getFoods = async () => {
-      console.log("buenas noches");
-      console.log(foodsCollectionRefs);
+  });
 
-      const data = await getDocs(foodsCollectionRefs);
+  const updateForm = document.querySelector(".update");
+  updateForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-      console.log("getFoods update");
-      //data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    const docRef = doc(db, "data", updateForm.id.value);
 
-      setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    };
+    updateDoc(docRef, {
+      Name: "updated Name",
+      FoodGroup: newFoodGroup,
+      FoodSubgroup: newFoodSubgroup,
+      Country: newC ountry,
+      Energy: Number(newEnergy),
+      TotalCarbos: Number(newTotalCarbos),
+      TotalProteins: Number(newTotalProteins),
+      TotalLipids: Number(newTotalLipids),
+    }).then(() => {
+      updateForm.reset();
+    });
+  });
 
-    getFoods(); 
-  };
-
-  //---------------------
+  //---------------------------------------
 
   //MODAL
-  //Abrir y cerrar el modal de añadir alimento
+  //Abrir y cerrar el modal de añadir  alimento
 
   const [show, setShow] = useState(false);
 
@@ -409,15 +409,16 @@ const cargarDocumentos = () => {
                                   >
                                     <i class="fa fa-times"></i>
                                   </Button>
-
+                                  <em> </em>
                                   <Button
                                     className="btn-icon btn-link edit btn btn-info btn-sm"
-                                    onClick={() => openUpdateModal(food)}
+                                    onClick={() => {
+                                      setUpdata(food.data)
+                                    setModalShow(true)
+                                    }}
+                                    
                                   >
                                     <i className="fa fa-edit"></i>
-                                  </Button>
-                                  <Button className="btn-icon btn-link edit btn btn btn-sm">
-                                    <i className="nc-icon nc-alert-circle-i"></i>
                                   </Button>
                                 </div>
                               </tr>
@@ -585,47 +586,36 @@ const cargarDocumentos = () => {
                     </ModalBody>
                   </Modal>
 
-                  <Modal
-                    isOpen={showUpdate}
-                    onHide={() => setShowUpdate(false)}
-                  >
+                  <Modal show={modalShow} onHide={() =>setModalShow(false)} data={updata}>
                     <ModalHeader>Actualizar Alimento</ModalHeader>
 
                     <ModalBody>
-                      <Form
-                        onSubmit={() => {
-                          handleSubmitUpdate(openFood);
-                        }}
-                      >
+                      <Form onSubmit={updateDocFood}>
                         <CardBody>
                           <div class="row">
                             <div class="col-md-6">
-                              <label>
-                                Food Name
-                                <label style={{ color: "red" }}>*</label>
-                              </label>
-
+                              <label>Food Name *</label>
                               <div class="form-group">
                                 <Input
                                   required
                                   type="text"
-                                  defaultValue={openFood.Name}
-                                  onChange={handleChangeName}
+                                  value={Name}
+                                  onChange={()=>{handleChange('Name') }}
                                 />
                               </div>
                               <label>Food Group</label>
                               <div class="form-group">
                                 <Input
                                   type="text"
-                                  defaultValue={openFood.FoodGroup}
-                                  onChange={handleChangeFoodGroup}
+                                  value={FoodGroup}
+                                  onChange={handleChange('FoodGroup') }
                                 />
                               </div>
                               <label>Food Subgroup</label>
                               <div class="form-group">
                                 <Input
                                   type="text"
-                                  defaultValue={openFood.FoodSubgroup}
+                                  value={newFoodSubgroup}
                                   onChange={handleChangeFoodSubgroup}
                                 />
                               </div>
@@ -633,7 +623,7 @@ const cargarDocumentos = () => {
                               <div class="form-group">
                                 <Input
                                   type="text"
-                                  defaultValue={openFood.Country}
+                                  value={newCountry}
                                   onChange={handleChangeCountry}
                                 />
                               </div>
@@ -644,7 +634,7 @@ const cargarDocumentos = () => {
                                 <Input
                                   type="number"
                                   min="0"
-                                  defaultValue={openFood.Energy}
+                                  value={newEnergy}
                                   onChange={handleChangeEnergy}
                                 />
                               </div>
@@ -653,7 +643,7 @@ const cargarDocumentos = () => {
                                 <Input
                                   type="number"
                                   min="0"
-                                  defaultValue={openFood.TotalCarbos}
+                                  value={newTotalCarbos}
                                   onChange={handleChangeTotalCarbos}
                                 />
                               </div>
@@ -662,7 +652,7 @@ const cargarDocumentos = () => {
                                 <Input
                                   type="number"
                                   min="0"
-                                  defaultValue={openFood.TotalProteins}
+                                  value={newTotalProteins}
                                   onChange={handleChangeTotalProteins}
                                 />
                               </div>
@@ -671,7 +661,7 @@ const cargarDocumentos = () => {
                                 <Input
                                   type="number"
                                   min="0"
-                                  defaultValue={openFood.TotalLipids}
+                                  value={newTotalLipids}
                                   onChange={handleChangeTotalLipids}
                                 />
                               </div>
@@ -695,7 +685,7 @@ const cargarDocumentos = () => {
                               <Button
                                 color="danger"
                                 class="btn-round btn btn-info"
-                                onClick={handleCloseUpdate}
+                                onClick={handleClose}
                               >
                                 Close
                               </Button>
