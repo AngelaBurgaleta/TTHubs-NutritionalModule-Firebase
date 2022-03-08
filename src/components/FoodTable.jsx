@@ -255,13 +255,15 @@ const cargarDocumentos = () => {
 
   const [openFood, setOpenFood] = useState({});
 
-  const handleSubmitUpdate = async (food) => {
+  const handleSubmitUpdate = async (event, food) => {
+    event.preventDefault();
+
     console.log(food.id);
     const foodDocRef = doc(db, "data", food.id)
     
       await updateDoc(foodDocRef, {
         Name: newName || food.newName,
-        FoodGroup: 'prue',
+        //FoodGroup: newFoodGroup || food.newFoodGroup,
         //FoodSubgroup: newFoodSubgroup || food.newFoodSubgroup,
         //Country: newCountry || food.newCountry,
         //Energy: Number(newEnergy) || food.newEnergy,
@@ -270,7 +272,7 @@ const cargarDocumentos = () => {
         //TotalLipids: Number(newTotalLipids) || food.newTotalLipids,
       });
   
-    updateDoc(foodDocRef, openFood); //??
+    
     console.log("buenas tardes");
 
     
@@ -296,6 +298,7 @@ const cargarDocumentos = () => {
       //data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 
       setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      handleCloseUpdate();
     };
 
     getFoods(); 
@@ -593,8 +596,8 @@ const cargarDocumentos = () => {
 
                     <ModalBody>
                       <Form
-                        onSubmit={() => {
-                          handleSubmitUpdate(openFood);
+                        onSubmit={(event) => {
+                          handleSubmitUpdate(event, openFood);
                         }}
                       >
                         <CardBody>
