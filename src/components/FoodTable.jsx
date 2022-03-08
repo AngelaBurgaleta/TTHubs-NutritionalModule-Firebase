@@ -180,6 +180,7 @@ const cargarDocumentos = () => {
 
       console.log(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       setFoods(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      handleClose();
     };
 
     getFoods();
@@ -259,23 +260,21 @@ const cargarDocumentos = () => {
     event.preventDefault();
 
     console.log(food.id);
-    const foodDocRef = doc(db, "data", food.id)
-    
-      await updateDoc(foodDocRef, {
-        Name: newName || food.newName,
-        //FoodGroup: newFoodGroup || food.newFoodGroup,
-        //FoodSubgroup: newFoodSubgroup || food.newFoodSubgroup,
-        //Country: newCountry || food.newCountry,
-        //Energy: Number(newEnergy) || food.newEnergy,
-        //TotalCarbos: Number(newTotalCarbos) || food.newTotalCarbos,
-        //TotalProteins: Number(newTotalProteins) || food.newTotalProteins,
-        //TotalLipids: Number(newTotalLipids) || food.newTotalLipids,
-      });
-  
-    
+    const foodDocRef = doc(db, "data", food.id);
+
+    await updateDoc(foodDocRef, {
+      Name: newName || food.Name,
+      FoodGroup: newFoodGroup || food.FoodGroup,
+      FoodSubgroup: newFoodSubgroup || food.FoodSubgroup,
+      Country: newCountry || food.Country,
+      Energy: Number(newEnergy) || food.Energy,
+      TotalCarbos: Number(newTotalCarbos) || food.TotalCarbos,
+      TotalProteins: Number(newTotalProteins) || food.TotalProteins,
+      TotalLipids: Number(newTotalLipids) || food.TotalLipids,
+    });
+
     console.log("buenas tardes");
 
-    
     setNewName("");
     setNewFoodGroup("");
     setNewFoodSubgroup("");
@@ -284,9 +283,6 @@ const cargarDocumentos = () => {
     setNewTotalCarbos(0);
     setNewTotalProteins(0);
     setNewTotalLipids(0);
- 
-
-    
 
     const getFoods = async () => {
       console.log("buenas noches");
@@ -301,7 +297,7 @@ const cargarDocumentos = () => {
       handleCloseUpdate();
     };
 
-    getFoods(); 
+    getFoods();
   };
 
   //---------------------
